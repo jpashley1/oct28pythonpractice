@@ -1,6 +1,7 @@
 import sqlite3
 
 
+
 def connect_to_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
@@ -44,6 +45,28 @@ def initial_setup():
 
     conn.close()
 
+
+def photos_all():
+    conn = connect_to_db()
+    rows = conn.execute(
+        """
+        SELECT * FROM photos
+        """
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+def photos_create(name, width, height):
+    conn = connect_to_db()
+    row = conn.execute(
+        """
+        INSERT INTO photos (name, width, height)
+        VALUES (?, ?, ?)
+        RETURNING *
+        """,
+        (name, width, height),
+    ).fetchone()
+    conn.commit()
+    return dict(row)
 
 if __name__ == "__main__":
     initial_setup()
