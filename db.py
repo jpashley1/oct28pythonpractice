@@ -55,6 +55,17 @@ def photos_all():
     ).fetchall()
     return [dict(row) for row in rows]
 
+def photos_find_by_id(id):
+    conn = connect_to_db()
+    row = conn.execute(
+        """
+        SELECT * FROM photos
+        WHERE id = ?
+        """,
+        (id,),
+    ).fetchone()
+    return dict(row)
+
 def photos_create(name, width, height):
     conn = connect_to_db()
     row = conn.execute(
@@ -67,6 +78,32 @@ def photos_create(name, width, height):
     ).fetchone()
     conn.commit()
     return dict(row)
+
+
+def photos_update_by_id(id, name, width, height):
+    conn = connect_to_db()
+    row = conn.execute(
+        """
+        UPDATE photos SET name = ?, width = ?, height = ?
+        WHERE id = ?
+        RETURNING *
+        """,
+        (name, width, height, id),
+    ).fetchone()
+    conn.commit()
+    return dict(row)
+
+def photos_destroy_by_id(id):
+    conn = connect_to_db()
+    row = conn.execute(
+        """
+        DELETE from photos
+        WHERE id = ?
+        """,
+        (id,),
+    )
+    conn.commit()
+    return {"message": "Photo destroyed successfully"}
 
 if __name__ == "__main__":
     initial_setup()
